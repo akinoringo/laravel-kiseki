@@ -11,7 +11,7 @@
       <div class="font-weight-lighter">{{ $effort->created_at->format('Y/m/d H:i') }}</div>
     </div>
 
-  @if( Auth::id() === $effort->user_id )
+  @if( Auth::id() === $effort->user_id && $effort->goal->status === 0)
     <!-- dropdown -->
       <div class="ml-auto card-text">
         <div class="dropdown">
@@ -29,9 +29,9 @@
           </div>
         </div>
       </div>
-      <!-- dropdown -->
+    <!-- dropdown -->
 
-      <!-- modal -->
+    <!-- modal -->
       <div id="modal-delete-{{ $effort->id }}" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
@@ -54,8 +54,8 @@
           </div>
         </div>
       </div>
-      <!-- modal -->
-    @endif
+    <!-- modal -->
+  @endif
 
   </div>
   <div class="card-body pt-0">

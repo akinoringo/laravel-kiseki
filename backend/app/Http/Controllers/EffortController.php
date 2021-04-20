@@ -41,7 +41,7 @@ class EffortController extends Controller
 
 		if (!isset($goals[0])) {
 
-			return redirect()->route('mypage.index')->with([
+			return redirect()->route('mypage.show', ['id' => Auth::user()->id])->with([
 				'flash_message' => 'まずは目標を作成してください',
 				'color' => 'danger'
 			]);
@@ -75,8 +75,7 @@ class EffortController extends Controller
 
 		} else {
 
-			return redirect()->route('mypage.show', [
-				'id' => Auth::user()->id,
+			return redirect()->route('mypage.show',['id' => Auth::user()->id])->with([
 				'flash_message' => 'クリア済みの目標です。',
 				'color', 'danger'
 			]);
@@ -112,17 +111,15 @@ class EffortController extends Controller
 			
 			$this->updateGoalStatus($goal, $efforts);
 
-			return redirect()->route('mypage.show', [
-				'id' => Auth::user()->id,
+			return redirect()->route('mypage.show', ['id' => Auth::user()->id])->with([
 				'flash_message' => '軌跡を編集しました。',
 				'color' => 'success'
 			]);			
 
 		} else {
 
-			return redirect()->route('mypage.show')->with([
-				'id' => Auth::user()->id,
-				'flash_message' => 'クリア済みの目標です。',
+			return redirect()->route('mypage.show', ['id' => Auth::user()->id])->with([
+				'flash_message' => 'クリア済みの目標なので、軌跡は編集できません。',
 				'color' => 'danger'
 			]);
 		}
@@ -134,19 +131,28 @@ class EffortController extends Controller
 		// $effortに紐づく$goalの取得
 		$goal = Goal::where('id', $effort->goal_id)->get()->first();
 
-		// $effortの消去
-		$effort->delete();
+		if ($goal->status === 0) {
 
-		// 消去した$effortに紐づいていた$goalに紐づく軌跡合計時間($efforts_time)を再計算
-		$efforts = Effort::where('goal_id', $goal->id)->get();
-		$goal->efforts_time = $this->sumEffortsTime($efforts);
-		$goal->save();
+			// $effortの消去
+			$effort->delete();
 
-		return redirect()->route('mypage.show')->with([
-			'id' => Auth::user()->id,
-			'flash_message' => '軌跡を削除しました。',
-			'color' => 'success'
-		]);
+			// 消去した$effortに紐づいていた$goalに紐づく軌跡合計時間($efforts_time)を再計算
+			$efforts = Effort::where('goal_id', $goal->id)->get();
+			$goal->efforts_time = $this->sumEffortsTime($efforts);
+			$goal->save();
+		
+			return redirect()->route('mypage.show', ['id' => Auth::user()->id])->with([
+				'flash_message' => '軌跡を削除しました。',
+				'color' => 'success'
+			]);			
+		} else {
+			return redirect()->route('mypage.show', ['id' => Auth::user()->id])->with([
+				'flash_message' => 'クリア済みの目標なので、軌跡は削除できません。',
+				'color' => 'danger'
+			]);			
+		}
+
+
 	}
 
 
@@ -168,15 +174,16 @@ class EffortController extends Controller
 			$goal->status = 1;
 			$goal->save();
 
-			session()->flash([
-				'flash_message' => '目標をクリアしました。',
-				'color' => 'success'
-			]);
+			session()->flash('flash_message', 'おめでとうございます。目標をクリアしました。');
+			session()->flash('color', 'success');
 
 		} else {
 
 			$goal->status = 0;
 			$goal->save();
+
+			session()->flash('flash_message', '軌跡を作成しました。');
+			session()->flash('color', 'success');			
 
 		}		
 
