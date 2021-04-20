@@ -27,7 +27,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/mypage/index';
+    protected $redirectTo = '/';
 
     /**
      * Create a new controller instance.
@@ -44,7 +44,7 @@ class LoginController extends Controller
     public function guestLogin()
     {
         if (Auth::loginUsingId(self::GUEST_USER_ID)) {
-            return redirect('/mypage/index');
+            return redirect('/');
         }
 
         return redirect('/');
